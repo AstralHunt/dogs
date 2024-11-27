@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dog App</title>
+
+    <style>
+        /* VARIABLES */
+
+        :root {
+            --dark-blue: rgb(70 70 150);
+            --medium-blue: rgb(210, 225, 255);
+            --light-blue: aliceblue;
+        }
+
+        /* TYPOGRAPHY and TEXT */
+
+        html {
+            font-family: sans-serif;
+        }
+
+        h1 {
+            font-size: 3.6rem;
+            margin-bottom: 1rem;
+        }
+
+        h1, h2, .tagline {
+            color: var(--dark-blue);
+        }
+
+        /* LAYOUT */
+
+        header, main {  
+            padding: 1rem;
+        }
+
+        body {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            margin: 0;
+        }
+
+        main {
+            display: grid;
+            grid-template-columns: 5fr 4fr;
+        }
+
+        header {
+            display: grid;
+       
+            align-content: start;
+            grid-template-rows: min-content min-content 1fr;
+        }
+
+        ul#breed-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
+            gap: 0.5rem;
+
+            padding: 1rem 1rem 1rem 0;
+            margin-top: 0;
+            list-style-type: none;
+        }
+
+        /* HEADER */
+
+        header {
+            background-color: var(--medium-blue)
+        }
+
+        #random-image {
+            display: grid;
+            align-content: end;
+        }
+
+        #random-image>div{
+            position: sticky;
+            bottom: 1rem;
+        }
+
+        /* BREEDS LIST */
+
+        ul#breed-list li {
+            cursor: pointer;
+            background-color: var(--light-blue);
+            padding: .5rem;
+            border-radius: .5rem;
+            border: 1px solid var(--medium-blue);
+        }
+
+        ul#breed-list li:hover {
+            background-color: var(--medium-blue);
+        }
+
+        /* IMAGES */
+
+        img {
+            object-fit: cover;
+            border-radius: .5rem;
+        }
+
+        #random-image img {
+            height: 230px;
+            width: 100%;
+            object-fit: cover;
+        }
+
+        #chosen-breed img {
+            width: 100%;
+        }
+
+       /* CHOSEN BREED */
+
+        #chosen-breed button {
+            display: block;
+            width: fit-content;
+            margin-bottom: 1rem;
+        }
+
+        #chosen-breed h2 {
+            font-size: 3rem;
+            margin-top: 1rem;
+            padding: 1rem .5rem;
+            background-color: var(--medium-blue);
+        }
+
+        /* TODO: WRITE YOUR CSS BELOW */
+
+        #breed-list .activebreed {
+            background-color: #464595;
+            color: white;
+        }
+
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Dog App</h1>
+        <p class="tagline">Find your next pet!</p>
+        <div id="random-image">
+            <div>
+                <h2>A Random Dog Image for You</h2>
+                <img src="" alt="">
+            </div>
+        </div>
+    </header>
+    <main>
+        <ul id="breed-list"></ul>
+        <div id="chosen-breed">
+            <h2></h2>
+            <button>Get New Image of</button>
+            <img src="" alt="">
+        </div>
+    </main>
+
+    <script>
+        // TODO: your code here
+
+        let chosenbreed = "affenpinscher";
+        console.log(chosenbreed)
+        // Run on application start
+        function fetchDogList() {
+            fetch("https://dog.ceo/api/breeds/list/all")
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(dogListObject) {
+
+                for (let i = 0; i < Object.keys(dogListObject.message).length; i++) {
+                    let dogNav = Object.keys(dogListObject.message)[i];
+                    let li = document.createElement("li");
+                    document.getElementById("breed-list").append(li);
+                    li.innerHTML = dogNav;
+                    li.id = dogNav;
+                    
+                    
+                    // listeners per card
+                    li.addEventListener("click", chooseBreed);
+                }
+
+                document.getElementById(chosenbreed).classList.add("activebreed");
+                chooseBreed(chosenbreed);
+            })
+            .catch(function(error){
+                console.error(error);
+            })
+        }
+        fetchDogList()
+
+        // Run after clicking breed
+        function chooseBreed(chosenbreed) {
+            if (this.textContent != undefined) {
+                chosenbreed = this.textContent;
+            }
+            document.querySelector(".activebreed").classList.remove("activebreed")
+            document.getElementById(chosenbreed).classList.add("activebreed")
+            document.querySelector("#chosen-breed > h2").innerHTML = (chosenbreed);
+            document.querySelector("#chosen-breed > button").textContent =(`Get New Image of ${chosenbreed}`);
+            fetchDogImage(chosenbreed);
+        }
+
+        document.querySelector("#chosen-breed > button").addEventListener("click", clickGetNewImage);
+        // Run after clicking Get Image
+        function clickGetNewImage(event) {
+            console.log(document.querySelector(".activebreed").innerHTML)
+            fetchDogImage(document.querySelector(".activebreed").innerHTML);
+        }
+
+        // Selected Dog Image fetcher
+        function fetchDogImage(ledoggo) {
+            fetch("https://dog.ceo/api/breed/"+ledoggo+"/images")
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(dogImageURLObject){
+                document.querySelector("#chosen-breed > img").src = dogImageURLObject.message[Math.floor(Math.random()*dogImageURLObject.message.length)];
+            })
+        }
+
+        //Random dog image
+        function randomDogImage() {
+            fetch("https://dog.ceo/api/breeds/image/random")
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(randomDogImageURLObject){
+                document.querySelector("#random-image > div > img").src = "lol".src = randomDogImageURLObject.message;
+            })
+        }
+        randomDogImage();
+        setInterval(randomDogImage, 10000)
+
+    </script>
+</body>
+</html>
